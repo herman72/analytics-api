@@ -49,11 +49,23 @@ def get_event(event_id: int,
 
 # update data
 # PUT /api/events/12
-@router.put("/{event_id}")
-def update_event(event_id: int, payload: EventUpdateSchema) -> EventModel:
-    print(payload)
+@router.put("/{event_id}", response_model=EventModel)
+def update_event(event_id: int, 
+                 payload: EventUpdateSchema, 
+                 session: Session=Depends(get_session)):
+    query = select(EventModel).where(EventModel.id == event_id)
+    obj = session.exec(query).first()
+    if not obj:
+        raise HTTPException(status_code=404, detail="Event not found")
     data = payload.model_dump()
-    return {"id": event_id, **data}
+    print(type(data))
+    for k, v in data.items():
+        setattr(obj, k, v)
+    
+    session.add(obj)
+    session.commit()
+    session.refresh(obj)
+    return obj
 
 #Delete
 # @router.delete("/{event_id}")
