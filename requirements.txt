@@ -5,3 +5,5 @@ sqlmodel
 pydantic
 sqlalchemy
 timescaledb
+python-decouple
+psycopg[binary]
